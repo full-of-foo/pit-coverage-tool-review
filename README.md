@@ -1,4 +1,4 @@
-# [CA650] Assignment: Test Coverage Tool Review (PIT)
+# [CA650] PIT: Test Coverage Tool Review
 
 Requirements: TODO
 
