@@ -26,6 +26,13 @@ RUN mkdir -p /usr/share/maven \
   && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 ENV MAVEN_HOME /usr/share/maven
 
+RUN set -ex \
+  && curl -O https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash \
+  && curl -O https://raw.githubusercontent.com/juven/maven-bash-completion/master/bash_completion.bash \
+  && mv git-completion.bash ~/.git_completion.bash \
+  && mv bash_completion.bash ~/.mvn_bash_completion.bash \
+  && echo "source ~/.git_completion.bash" >> ~/.bashrc \
+  && echo "source ~/.mvn_bash_completion.bash" >> ~/.bashrc
 
 ### App
 ENV WORKDIR /usr/src/app
