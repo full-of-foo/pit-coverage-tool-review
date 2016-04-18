@@ -31,12 +31,12 @@ ENV MAVEN_HOME /usr/share/maven
 ENV WORKDIR /usr/src/app
 RUN mkdir -p $WORKDIR
 WORKDIR $WORKDIR
-
-## Volumes
 VOLUME $WORKDIR
-VOLUME /root/.m2
 
-## Source
-ADD . $WORKDIR
+## Add Cache-order Source
+ADD pit-review/pom.xml $WORKDIR
+RUN mvn verify clean --fail-never
+ADD pit-review/src $WORKDIR/src
 
-CMD ["mvn"]
+## Compile and run tests
+CMD mvn verify
