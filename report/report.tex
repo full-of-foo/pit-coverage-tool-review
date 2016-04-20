@@ -6,6 +6,9 @@
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage{lipsum} %This package just generates Lorem Ipsum filler text. 
+\usepackage{natbib} % Harvard style bib
+\bibliographystyle{IEEEtranN}
+\usepackage{hyperref} % For hyperlinks in the PDF
 
 \title{PIT: Test Coverage Tool Review\\ \Large{CA650 Assignment 2}}
 
@@ -30,7 +33,7 @@ Given a chosen a software testing tool, either commercial or open source, produc
 \newpage
 
 \section{Tool Overview}
-\lipsum 
+\citep{Claus} \lipsum 
 
 
 \section{Mutation Testing}
@@ -47,5 +50,9 @@ Given a chosen a software testing tool, either commercial or open source, produc
 
 \section{Assessment}
 \lipsum
+
+\vspace{-7.5mm}
+\renewcommand{\refname}{\section*{References}}
+\bibliography{report}
 
 \end{document}

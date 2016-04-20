@@ -8,5 +8,7 @@ report/report.idx
 report/report.lof
 report/report.lot
 report/report.toc
+report/report.bbl
+report/report.blg
 # remove when shipping
 report/report.pdf
