@@ -1,55 +1,51 @@
-\documentclass[a4paper, 11pt]{article}
-\usepackage{comment} % enables the use of multi-line comments (\ifx \fi) 
-\usepackage{lipsum} %This package just generates Lorem Ipsum filler text. 
-\usepackage{fullpage} % changes the margin
-\usepackage{listings}
-\usepackage{hyperref}
-\usepackage{color}
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{lipsum} %This package just generates Lorem Ipsum filler text. 
 
+\title{PIT: Test Coverage Tool Review\\ \Large{CA650 Assignment 2}}
 
-\definecolor{mygreen}{rgb}{0,0.6,0}
-\definecolor{mygray}{rgb}{0.5,0.5,0.5}
-\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\author{Anthony Troy\\ \small{14212116}}
 
-\lstset{ %
-  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
-  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
-  breaklines=true,                 % sets automatic line breaking
-  captionpos=b,                    % sets the caption-position to bottom
-  commentstyle=\color{mygreen},    % comment style
-  deletekeywords={...},            % if you want to delete keywords from the given language
-  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
-  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
-  keywordstyle=\color{blue},       % keyword style
-  language=Octave,                 % the language of the code
-  otherkeywords={*,...},           % if you want to add more keywords to the set
-  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
-  numbersep=5pt,                   % how far the line-numbers are from the code
-  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
-  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
-  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-  showstringspaces=false,          % underline spaces within strings only
-  showtabs=false,                  % show tabs within strings adding particular underscores
-  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
-  stringstyle=\color{mymauve},     % string literal style
-  tabsize=3,	                   % sets default tabsize to 2 spaces
-}
-
+\date{\today}
 
 \begin{document}
-%Header-Make sure you update this information!!!!
-\noindent
-\large\textbf{CA650 Software Process Quality}  \hfill \textbf{Anthony Troy} \\
-\normalsize PIT: Test Coverage Tool Review \hfill Date: 16/4/2016
+\maketitle
 
-\section*{Report Requirements}
-\lipsum
+\renewcommand{\abstractname}{Requirements}
+\begin{abstract}
+Given a chosen a software testing tool, either commercial or open source, produce a report that explains: the setup and usage of the tool; a sample run of the tool using its main functionality to set up and run three tests (code examples from your chosen language, screen shots etc.); an analysis of the coverage methods available using the tool (i.e. Graph, Logic, Input Space, Syntax); and an overall assessment of the usability, coverage and robustness of the tool. For instance, such a tool might be muJava. This project is due in simple A4 format (8 \textless= pages \textless= 14), accounts for  20\% of the final module grade and must be submitted via Loop on April 22\textsuperscript{nd} before 6 \MakeUppercase{pm}.
 
-\section*{Introduction}
+
+
+\end{abstract}
+
+\vspace{3.5cm}
+\tableofcontents
+
+\newpage
+
+\section{Tool Overview}
 \lipsum 
 
+
+\section{Mutation Testing}
+\lipsum
+
+
+\section{Configuration}
+\lipsum
+
+
+\section{Test and Coverage Runs}
+\lipsum
+
+
+\section{Assessment}
+\lipsum
 
 \end{document}

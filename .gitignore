@@ -4,5 +4,9 @@ report/report.aux
 report/report.synctex.gz
 report/report.out
 report/report.log
+report/report.idx
+report/report.lof
+report/report.lot
+report/report.toc
 # remove when shipping
 report/report.pdf
