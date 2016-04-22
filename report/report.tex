@@ -8,7 +8,41 @@
 \usepackage{lipsum} %This package just generates Lorem Ipsum filler text. 
 \usepackage{natbib} % Harvard style bib
 \bibliographystyle{IEEEtranN}
-\usepackage{hyperref} % For hyperlinks in the PDF
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{graphicx}
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Octave,                 % the language of the code
+  otherkeywords={*,...},           % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=3,	                   % sets default tabsize to 2 spaces
+}
 
 \title{PIT: Test Coverage Tool Review\\ \Large{CA650 Assignment 2}}
 
@@ -33,23 +67,132 @@ Given a chosen a software testing tool, either commercial or open source, produc
 \newpage
 
 \section{Tool Overview}
-\citep{Claus} \lipsum 
-
+Our candidate test coverage tool, PIT, is an active mutation testing framework for Java and the JVM. Formely being named Parallel Isolated Test, the project's initial function was to isolate static state through running JUnit tests in parallel using separate classloaders, however the author later found that this turned out to be a ``much less interesting problem than mutation testing which initially needed a lot of the same (code) plumbing" \citep{Coles}. 
+\par
+Mutation testing tools such as PIT are inherently linked to the domain of test coverage. A given test case's mutation adequacy score reflects the effectiveness of the case in detecting faults. This measurement of ``testing tests" can be used to challenge the validity of one's traditional coverage metrics and in itself serve as a coverage criterion. As we will later explore, PIT supports reporting on both line coverage and mutation coverage information.
+\par
+Mutation testing systems generally derive adequacy scores in four phases: mutant generation, test selection, mutant insertion and mutant detection. For most of the notable tools in this space these phases may be concurrent or hard to distinguish from each other. In less advanced systems only the generation phase is automated. Overall, from framework-to-framework the strategies adopted for these phases varies greatly. One reason for this disparity could be that many JVM-based mutation testing systems have been ``written to meet the needs of academic research" \citep{Coles}. 
+\par
+The project positions itself as being a ``state of the art mutation testing system" which provides ``gold standard test coverage" for JVM-based languages. With respect to the existing tools in this space, PIT is argued to be quite performant \citep{Laenen, Coles}. This is primarily due to fact that PIT adopts an effective byte code based approach in the mutant detection and generation phases. Generally systems will adopt either a source code or byte based approach at these stages. 
+\par
+One should note that using byte code during the mutation detection phase is quite computationally expensive, though this can be offset by an effective test selection phase. Additionally, systems using source code at the generation stage can also incur a large computational cost if a naive approach is followed.
+Tools like MuJava, Javalanche and Jumble too use byte code generation \citep{Madeyski, Coles}, however 
+PIT performs various other optimisations. Rather than blindly running all cases against one mutation PIT will first determine overall line coverage and subsequently run only those cases that can actually reach the mutation. The system also supports an option to re-use the cached results from a previous analysis that can greatly reduce the cost of consecutive runs, which we will later demonstrate.
+\par
+As previously highlighted, unlike the tools in this space stemming from academia, PIT is an open-source project that is commercially popular and actively contributed too. As you would expect, meeting this level of adoption requires being integratable the with the de facto testing and build tools in the JVM ecosystem. The framework has first-class support for the JUnit4, TestNg, Ant and Maven. One of course also has access to its  command-line interface API, which in itself allows for extensibility. Third-party integrations with PIT have too been developed for tools such as Gradle, Eclipse and InteliJ \citep{Coles}. We later illustrate how to configure and run some of these integrations.
 
 \section{Mutation Testing}
-\lipsum
+On a high-level, mutation testing can be described as a ``fault-based testing technique" that provides a testing criterion which can be be used to measure the the effectiveness of a given test case in terms of its ability in detecting faults \citep{Jia}. Simply, faults are injected into one's testing target, and when those tests are ran there are total and per case mutation adequacy scores derived. Under most systems, such as PIT, given those tests have failed then the mutation is killed and if they have passed then the mutation has survived. In turn, this total percentage of mutations killed acts as a testing criterion for test case quality.
+\par
+The premise of mutation testing is intuitively appealing; discovering the input
+test data that can actually be used to reveal real faults.
+Nevertheless, it is not actually possible for any system to generate every possible permutation of mutant in a candidate program. 
+Thus, as we will later illustrate with PIT, mutation testing systems will only offer a finite set of injectable mutators. Therefore, hopeful that these finite amount mutators will reveal faults, mutation testing is said to rely two assumptions: the Competent Programmer Hypothesis (CPH) and Coupling Effect \citep{Jia2}.
+\par
+The CPH asserts that a ``program produced by a competent programmer is close to the final correct version of a program". Thus, it
+is assumed that the source faults introduced by a competent programmer
+are relatively simple and can be corrected by small syntactical changes.
+Accordingly, in mutation testing only simple syntactical mutations are generally
+used. Contrarily, the Coupling Effect brings the suggestion that tests  ``capable of catching
+first order mutations will also detect higher order mutations
+that contain these first order mutations" \citep{Gopinath}.
+\par
+As previously highlighted, the implementation of mutation testing systems are generally characterised in terms of their adopted mutation generation techniques. Another, and more high-level, distinction can be made with respect to how a given tool analyses how mutants are killed during
+the execution process. Such techniques can be classified into three types: strong, weak and firm mutation. Under strong mutation, or traditional mutation, ``given program \mathit{p}, a mutant  \mathit{m} of program  \mathit{p} is said to be killed only if mutant  \mathit{m}
+gives a different output from the original program \mathit{p}" \citep{Jia2}. 
+\par 
+In contrast, weak mutation requires only that the value produced at the point we introduce \mathit{m} is different from the corresponding value in \mathit{p} for \mathit{m} to be killed. This more optimal approach is adopted by PIT; instead of analysing each mutant after the execution of the entire
+suite run, mutants are checked immediately after their respective execution point. Firm mutation attempts to ``overcome the disadvantages of both weak and strong mutations by providing a continuum
+of intermediate possibilities". Although there is no tool yet available using this technique, \citet{Jia2} asserts that such would involve one outlining a `compare state' threshold which would range ``between the intermediate states after execution (weak) and the final output (strong)". 
+
+\section{Tool Evaluation}
+
+\subsection{Included Documents}
+In conjunction with our evaluation, the following sources have been used and submitted with this report:
+\begin{itemize}
+  \item README.md
+  \item .gitignore
+  \item practical/Dockerfile (builds and runs all of our review projects)
+  \item practical/naive-app (SUT application)
+  \item practical/maven-pit-review (source and build project under Maven) 
+  \item practical/ant-pit-review (source and build project under Ant)
+  \item practical/gradle-pit-review (source and build project under Gradle)
+  \item report/report.pdf
+  \item report/report.tex
+  \item report/report.bib
+\end{itemize}
 
 
-\section{Configuration}
-\lipsum
+\subsection{Tool Configuration}
+ As you would expect, all of the build and run configurations in PIT are declarative rather than being programmatic. If one has the requirement to measure the effectiveness of a test suite through revealing  mutation coverage, it is reasonable to expect that there should be no additional programming effort involved; PIT follows this philosophy. In fact the tool's JAR actually exposes no public APIs to be used within source code. There are only those APIs exposed for build and run configurations.
 
+\subsubsection{Build Configurations}
+As previously mentioned, PIT integrates with most of well-established JVM-based testing frameworks, this is true also for integrations with popular build tools. Firstly, we begin by building our Ubuntu 14 container host under test (CUT) to have Java 8 installed and configured:
+\\
+\lstinputlisting[language=bash,lastline=19]{../practical/Dockerfile}
+\\
 
-\section{Test and Coverage Runs}
-\lipsum
+\noindent PIT's build tool support includes Maven, which is arguably the most popular automation framework for Java \citep{Tahchiev}. We then install and configure the latest Maven on our CUT as follows: 
+\\
+\lstinputlisting[language=bash,firstline=22,lastline=28]{../practical/Dockerfile}
+\\
 
+\noindent We then proceed to implement our subject under test (SUT) application. This naive application defines an interface allowing one to classify a triangle shape based on three supplied coordinates, wherein a classification can be either equilateral, isosceles, scalene or invalid. Accordingly we implement a \lstinline$TriangleType$ enum and following we define our \lstinline$Triangle$ class with one static method for classification. We also implement a \lstinline$TriangleTest$ case that meets total line coverage:
+\\
+\lstinputlisting[language=java,firstline=3]{../practical/naive-app/src/com/review/app/TriangleType.java}
+\\
+\lstinputlisting[language=java,firstline=4]{../practical/naive-app/src/com/review/app/Triangle.java}
+\\
+\\
+\lstinputlisting[language=java,firstline=10]{../practical/naive-app/test/com/review/app/TriangleTest.java}
+\\
+
+\noindent With our SUT application in place we can begin our project configuration. All static configurations for Maven occur in a \lstinline$pom.xml$ file. Running PIT under Maven requires only having JUnit 4 or above in place along with registering the \lstinline$pitest-maven$ build plugin. After adding the minimal plugin configurations, PIT will now perform mutation testing at end the of the maven \lstinline$verfiy$ lifecycle phases (after \lstinline$test$). We proceed by creating this file as follows: 
+\\
+\lstinputlisting[language=xml,firstline=7,lastline=62]{../practical/maven-pit-review/pom.xml}
+\\
+
+\noindent PIT's also supports integration with Ant, a more lightweight offering to Maven \citep{Tahchiev}. We proceed to install and configure the latest version of Ant on our CUT as follows: 
+\\
+\lstinputlisting[language=bash,firstline=39,lastline=48]{../practical/Dockerfile}
+\\
+Being simply a build `toolkit', Ant does not have any support around package dependency management. Accordingly, we explicitly include our required JAR dependencies in our Ant project:  \lstinline$lib/junit-4.9.jar$, \lstinline$lib/pitest-1.1.4.jar$ and \lstinline$lib/pitest-ant-1.1.4.jar$. Similar to Maven, all Ant project configuration mostly live within one file,  \lstinline$build.xml$. Running PIT under Ant requires somewhat more of a verbose configuration. We must: configure all source and test paths; define and configure a  \lstinline$pittest$ task; configure the clean and tests tasks; and configure test reporting outputs and paths. With the following in place our \lstinline$pit$ task will run after the completion of the default \lstinline$test$ task:
+\\
+\lstinputlisting[language=xml,firstline=4,lastline=50]{../practical/ant-pit-review/build.xml}
+\\
+
+\noindent Third-party PIT support is also available for the emerging build framework Gradle, which builds upon the constructs available in both Maven and Ant. Under Gradle one configures a project through a Groovy-based DSL in a \lstinline$build.gradle$ file. As you would expect, this approach is much less verbose than that of Maven and Ant. A minimal PIT configuration simply requires: requiring JUnit as a dependency, specifying the third-party plugin; and defining a \lstinline$pitest$ target with one's \lstinline$targetClasses$ value. In turn, a Gradle \lstinline$pitest$ task will now be available for use. We implement such as follows:
+\\
+\lstinputlisting[language=groovy]{../practical/gradle-pit-review/build.gradle}
+
+\subsubsection{Run Configurations}
+With our three configured projects in place we can now execute their respective mutation testing tasks. We add the SUT in the expected format to each project and begin testing as follows:
+\lstinputlisting[language=bash,firstline=66,lastline=92]{../practical/Dockerfile}
+All PIT run configurations are respected regardless of the chosen build tool, thus, for the purpose of brevity we will continue our review under our Maven project. A variety of run configurations are supported, the most notable are:
+\\
+\lstinputlisting[language=xml,firstline=55,lastline=124]{../practical/maven-pit-review/all-configs-pom.xml}
+\\
+In the above list we have inverted or incremented most of the default configuration values.  Outlined is the wide selection of common mutation operations PIT supports. When not following a whitelisting approach the following default mutators are applied for ease of use:
+\begin{itemize}
+  \item CONDITIONALS\_BOUNDARY\_MUTATOR 
+  \item INCREMENTS\_MUTATOR
+  \item INVERT\_NEGATIVES\_MUTATOR
+   \item MATH\_MUTATOR
+    \item NEGATE\_CONDITIONALS\_MUTATOR
+     \item RETURN\_VALUES\_MUTATOR
+      \item VOID\_METHOD\_CALLS\_MUTATOR
+\end{itemize}
+
+\subsection{Test Coverage Run}
+Given the default run configurations against our SUT, upon building and running our host CUT we get the following output:
+ \\
+\lstinputlisting{../practical/maven-pit-review/run_output.txt}
+\\
+We can note that for our naive application, which has total line coverage, 44 mutations are generated and only eight survive, thus resulting in a total mutation adequacy score of 82\%. The seven default mutation operations are generated across our 12 test cases, resulting in the execution of 115 mutated test cases. The poor scoring of 20\% on the CONDITIONALS\_BOUNDARY\_MUTATOR is unsurprising considering that our  \lstinline$classify$ method is so branch-rich. We indeed have line coverage of these nine \lstinline$if$ statements but this scores proves we are performing the wrong test assertions.
 
 \section{Assessment}
-\lipsum
+Mutation testing is argued to be the `gold standard' of software testing. It is a well-established test criterion but an expensive one, as it involves generating and running many tests across several mutants. Indeed PIT is not the only mutation testing tool available for the JVM, however it is the most popular, active, performant and configurable tool in this space. PIT is not intended to be a replacement for code coverage systems, instead it can serve as a complementary toolkit. Simply put, in a straightforward and effective way PIT helps ensure that one is actually testing and verifying all the parts of the code that are assumed to be otherwise covered. 
+
 
 \vspace{-7.5mm}
 \renewcommand{\refname}{\section*{References}}

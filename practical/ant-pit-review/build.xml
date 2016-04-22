@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ant-pit-review">
+	<property name="classOutputDir" value="build" />
+	<path id="pitest.path">
+   	<pathelement location="lib/junit-4.9.jar" />
+		<pathelement location="lib/pitest-1.1.4.jar" />
+		<pathelement location="lib/pitest-ant-1.1.4.jar" />
+	</path>
+	<taskdef name="pitest" classname="org.pitest.ant.PitestTask" classpathref="pitest.path" />
+	<target name="clean">
+		<delete dir="${classOutputDir}" />
+	</target>
+	<target name="compile" depends="clean">
+		<mkdir dir="${classOutputDir}/classes" />
+		<javac srcdir="src" includeantruntime="false" debug="true" debuglevel="source,lines" destdir="${classOutputDir}/classes" />
+	</target>
+	<path id="test.path">
+		<pathelement location="${classOutputDir}/classes" />
+		<pathelement location="${classOutputDir}/test-classes" />
+		<pathelement location="lib/junit-4.9.jar" />
+	</path>
+	<target name="test" depends="compile">
+		<mkdir dir="${classOutputDir}/test-result" />
+		<mkdir dir="${classOutputDir}/test-classes" />
+		<javac includeantruntime="false" srcdir="test" destdir="${classOutputDir}/test-classes">
+			<classpath refid="test.path" />
+		</javac>
+		<junit>
+			<classpath refid="test.path" />
+			<batchtest todir="${classOutputDir}/test-result">
+				<fileset dir="test">
+					<include name="**/*Test.java" />
+				</fileset>
+				<formatter type="xml" />
+			</batchtest>
+		</junit>
+		<junitreport todir="${classOutputDir}/test-result">
+			<fileset dir="${classOutputDir}/test-result">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${classOutputDir}/test-result/report" />
+		</junitreport>
+	</target>
+	<target name="pit" depends="test">
+		<path id="mutation.path">
+			<path refid="pitest.path"/>
+			<path refid="test.path"/>
+		</path>
+		<pitest pitClasspath="pitest.path" threads="2" classPath="mutation.path" targetTests="com.review.*" targetClasses="com.review.*" reportDir="pitReports" sourceDir="src" />
+	</target>
+</project>

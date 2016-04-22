@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN set -ex \
   && sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list \
   && apt-get update \
-  && apt-get -y --force-yes install build-essential software-properties-common curl
+  && apt-get -y --force-yes install build-essential software-properties-common curl unzip
+
 
 ## Java dep
 RUN set -ex \
@@ -34,16 +35,58 @@ RUN set -ex \
   && echo "source ~/.git_completion.bash" >> ~/.bashrc \
   && echo "source ~/.mvn_bash_completion.bash" >> ~/.bashrc
 
+
+### Ant dep
+ENV ANT_VERSION 1.9.4
+RUN set -ex \
+  && cd \
+  && wget -q http://archive.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz \
+  && tar -xzf apache-ant-${ANT_VERSION}-bin.tar.gz \
+  && mv apache-ant-${ANT_VERSION} /opt/ant \
+  && rm apache-ant-${ANT_VERSION}-bin.tar.gz
+ENV ANT_HOME /opt/ant
+ENV PATH ${PATH}:/opt/ant/bin
+
+
+### Gradle dep
+ENV GRADLE_VERSION 2.7
+ENV GRADLE_SHA cde43b90945b5304c43ee36e58aab4cc6fb3a3d5f9bd9449bb1709a68371cb06
+RUN set -ex \
+ && cd /usr/lib \
+ && curl -fl https://downloads.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-bin.zip \
+ && echo "$GRADLE_SHA gradle-bin.zip" | sha256sum -c - \
+ && unzip "gradle-bin.zip" \
+ && ln -s "/usr/lib/gradle-${GRADLE_VERSION}/bin/gradle" /usr/bin/gradle \
+ && rm "gradle-bin.zip"
+ENV GRADLE_HOME /usr/lib/gradle
+ENV PATH $PATH:$GRADLE_HOME/bin
+
+
 ### App
 ENV WORKDIR /usr/src/app
-RUN mkdir -p $WORKDIR
+RUN mkdir -p $WORKDIR/maven-pit-review
+RUN mkdir -p $WORKDIR/ant-pit-review
+RUN mkdir -p $WORKDIR/gradle-pit-review
 WORKDIR $WORKDIR
 VOLUME $WORKDIR
 
-## Add Cache-order Source
-ADD pit-review/pom.xml $WORKDIR
-RUN mvn verify clean --fail-never
-ADD pit-review/src $WORKDIR/src
+## Add Maven cache-order source
+ADD maven-pit-review/pom.xml $WORKDIR/maven-pit-review
+RUN cd maven-pit-review && mvn verify clean --fail-never
+ADD naive-app/src $WORKDIR/maven-pit-review/src/main/java
+ADD naive-app/test $WORKDIR/maven-pit-review/src/test/java
+## Add Ant source
+ADD ant-pit-review $WORKDIR/ant-pit-review/
+ADD naive-app $WORKDIR/ant-pit-review/
+## Add Gradle source
+ADD gradle-pit-review $WORKDIR/gradle-pit-review/
+ADD naive-app/src $WORKDIR/gradle-pit-review/src/main/java
+ADD naive-app/test $WORKDIR/gradle-pit-review/src/test/java
 
-## Compile and run tests
-CMD mvn verify
+## Compile then run Ant and Maven tests
+RUN echo "Running naive-app PIT tests under Maven..."
+RUN cd maven-pit-review && mvn verify
+RUN echo "Running naive-app PIT tests under Ant..."
+RUN cd ant-pit-review && ant pit
+RUN echo "Running naive-app PIT tests under Gradle..."
+RUN cd gradle-pit-review && gradle pitest

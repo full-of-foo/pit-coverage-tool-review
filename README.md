@@ -1,7 +1,3 @@
 # [CA650] PIT: Test Coverage Tool Review
 
-Requirements: TODO
-
-## Development
-
- - TODO
+`cd practical && docker build -t pit . && docker run -it pit`

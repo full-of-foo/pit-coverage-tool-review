@@ -1,0 +1,128 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.review.app</groupId>
+  <artifactId>maven-pit-review</artifactId>
+  <version>1.0-SNAPSHOT</version>
+	<repositories>
+		<repository>
+			<id>oss-sonatype</id>
+			<name>oss-sonatype</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>oss-sonatype</id>
+			<name>oss-sonatype</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>1.1.10-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>mutationCoverage</goal>
+						</goals>
+					</execution>
+				</executions>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!-- outputs coverage-report to ./pit-reports -->
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+        <configuration>
+          <!-- whitelists our sources under test -->
+          <targetClasses>
+            <param>com.review.*</param>
+          </targetClasses>
+          <!-- whitelists our cases for test -->
+          <targetTests>
+            <param>com.review.*</param>
+          </targetTests>
+          <!-- amount of threads to use -->
+          <threads>2</threads>
+          <!-- whitelist of mutator operations to use -->
+          <mutators>
+            <!-- replace some relational operators -->
+            <mutator>CONDITIONALS_BOUNDARY</mutator>
+            <!-- negate all conditional operators -->
+            <mutator>NEGATE_CONDITIONALS</mutator>
+            <!-- remove all conditionals gaurding statements -->
+            <mutator>REMOVE_CONDITIONALS</mutator>
+            <!-- replaces binary arithmetic operations  -->
+            <mutator>MATH</mutator>
+            <!-- mutates increments & decrements -->
+            <mutator>INCREMENTS</mutator>
+            <!-- inverts negation of numbers -->
+            <mutator>INVERT_NEGS</mutator>
+            <!-- mutates inline constants  -->
+            <mutator>INLINE_CONSTS</mutator>
+            <!-- mutates the return values of method calls  -->
+            <mutator>RETURN_VALS</mutator>
+            <!-- removes method calls to void methods -->
+            <mutator>VOID_METHOD_CALLS</mutator>
+            <!-- removes method calls to non void methods -->
+            <mutator>NON_VOID_METHOD_CALLS</mutator>
+            <!-- replaces constructor calls with null values -->
+            <mutator>CONSTRUCTOR_CALLS</mutator>
+            <!-- removes class assignments to member variables -->
+            <mutator>EXPERIMENTAL_MEMBER_VARIABLE</mutator>
+            <!-- replaces the default switch statement label -->
+            <mutator>EXPERIMENTAL_SWITCH</mutator>
+          </mutators>
+          <!-- whitelists packages out of scope for mutation -->
+          <avoidCallsTo>
+            <avoidCallsTo>java.util.logging</avoidCallsTo>
+            <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+            <avoidCallsTo>org.slf4j</avoidCallsTo>
+            <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+          </avoidCallsTo>
+          <!-- enables verbose logging -->
+          <verbose>true</verbose>
+          <!-- uses CSV reporting -->
+          <outputFormats>CSV</outputFormats>
+          <!-- dont fail when no mutations are found -->
+          <failWhenNoMutations>false</failWhenNoMutations>
+          <!-- include line coverage in output -->
+          <exportLineCoverage>true</exportLineCoverage>
+          <!-- fail when coverage is less than 80% -->
+          <coverageThreshold>80</coverageThreshold>
+          <!-- where to store history -->
+          <historyOutputFile>cache_dir/pit</historyOutputFile>
+          <!-- where to load history from -->
+          <historyInputFile>cache_dir/pit</historyInputFile>
+        </configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

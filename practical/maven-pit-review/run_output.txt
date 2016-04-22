@@ -1,0 +1,47 @@
+> $ cd practical && docker build -t pit . && docker run pit
+            ....
+[INFO] Adding org.pitest:pitest to SUT classpath
+[INFO] Mutating from /usr/src/app/maven-pit-review/target/classes
+[INFO] Defaulting to group id (com.review.app*)
+PIT >> INFO : Sending 1 test classes to minion
+PIT >> INFO : Sent tests to minion
+PIT >> INFO : MINION : PIT >> INFO : Checking environment
+PIT >> INFO : MINION : PIT >> INFO : Found  12 tests
+PIT >> INFO : MINION : PIT >> INFO : Dependency analysis reduced number of potential tests by 0
+PIT >> INFO : MINION : PIT >> INFO : 12 tests received
+PIT >> INFO : Calculated coverage in 0 seconds.
+PIT >> INFO : Created  1 mutation test units
+PIT >> INFO : Completed in 3 seconds
+              ....
+================================================================================
+- Statistics
+================================================================================
+>> Generated 44 mutations Killed 36 (82%)
+>> Ran 115 tests (2.61 tests per mutation)
+================================================================================
+- Mutators
+================================================================================
+> org.pitest.mutationtest.engine.gregor.mutators.ConditionalsBoundaryMutator
+>> Generated 10 Killed 2 (20%)
+> KILLED 2 SURVIVED 8 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.ReturnValsMutator
+>> Generated 8 Killed 8 (100%)
+> KILLED 8 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.MathMutator
+>> Generated 9 Killed 9 (100%)
+> KILLED 9 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
+> org.pitest.mutationtest.engine.gregor.mutators.NegateConditionalsMutator
+>> Generated 17 Killed 17 (100%)
+> KILLED 17 SURVIVED 0 TIMED_OUT 0 NON_VIABLE 0
+> MEMORY_ERROR 0 NOT_STARTED 0 STARTED 0 RUN_ERROR 0
+> NO_COVERAGE 0
+--------------------------------------------------------------------------------
